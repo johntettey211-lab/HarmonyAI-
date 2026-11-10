@@ -1,21 +1,50 @@
-- name: Set up Android SDK
-  uses: android-actions/setup-android@v3
-  with:
-    packages: |
-      platform-tools
-      platforms;android-35
-      build-tools;35.0.0- name: Set up Android SDK
-  uses: android-actions/setup-android@v3
-  with:
-    packages: |
-      platform-tools
-      platforms;android-35
-      build-tools;35.0.0
-uses: android-actions/setup-android@
-uses: android-actions/setup-android@v4
-with:
-  packages: 'platform-tools'
-- name: Set up Android SDK
-  uses: android-actions/setup-android@v4
-  with:
-    packages: 'platform-tools'
+
+name: Build HarmonyAI APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools;platforms;android-35;build-tools;35.0.0'
+
+      - name: Build HarmonyAI APK
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug
+          elif [ -f HarmonyAI_Android/gradlew ]; then
+            cd HarmonyAI_Android
+            chmod +x gradlew
+            ./gradlew assembleDebug
+          else
+            echo "Gradle wrapper not found."
+            exit 1
+          fi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HarmonyAI-APK
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            HarmonyAI_Android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
