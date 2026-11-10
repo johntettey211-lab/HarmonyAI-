@@ -1,4 +1,6 @@
-github/workflows/build.yml
-uses: android-actions/setup-android@v4
-with:
-  packages: platform-tools
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+
