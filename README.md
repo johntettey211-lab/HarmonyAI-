@@ -1,20 +1,15 @@
-# HarmonyAI-
-For editing photos, chatting and for voice chat 
 
 name: Build HarmonyAI APK
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/build.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -29,15 +24,18 @@ jobs:
       - name: Install Android SDK
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Extract HarmonyAI project
-        run: |
-          mkdir extracted
-          unzip HarmonyAI_Android_Project.zip -d extracted
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Extract project
+        run: unzip HarmonyAI_Android_Project.zip -d extracted
 
       - name: Build APK
         run: |
           cd extracted/HarmonyAI_Android
-          gradle --no-daemon assembleDebug
+          gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
